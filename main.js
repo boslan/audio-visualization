@@ -1,8 +1,8 @@
 (function () {
     const FFT_SIZE = 512;
     let hostSize = 400;
-    let rowSize = 32;
-    let columnSize = 32;
+    let rowSize = 5;
+    let columnSize = 5;
     let squadSize = hostSize / columnSize;
 
     // Init audio
@@ -14,7 +14,7 @@
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
-    const BUFFER_RATION = bufferLength / (columnSize * rowSize);
+    let bufferRatio = bufferLength / (columnSize * rowSize);
 
     analyser.connect(audioCtx.destination);
     source.connect(analyser);
@@ -40,11 +40,20 @@
 
         for (let row = 0; row < columnSize; row++) {
             for (let column = 0; column < rowSize; column++) {
-                const indexFreq = Math.floor((row * column) * BUFFER_RATION);
-                const freq = dataArray[indexFreq];
+                const freq = getAvgFreq(row, column);
                 drawFreqRect(row, column, freq);
             }
         }
+    }
+
+    function getAvgFreq(row, column) {
+        const start = Math.floor((row * column) * bufferRatio);
+        const end = Math.floor((row + 1) * (column + 1) * bufferRatio);
+        let sum = 0;
+        for (let i = start; i < end; i++) {
+            sum += dataArray[i];
+        }
+        return sum / (end - start);
     }
 
     /**
@@ -88,6 +97,7 @@
         if (value) {
             rowSize = +value;
             squadSize = getSquadSize(rowSize, columnSize, hostSize);
+            bufferRatio = bufferLength / (columnSize * rowSize);
             canvasCtx.clearRect(0, 0, hostSize, hostSize);
         }
     }
@@ -97,6 +107,7 @@
         if (value) {
             columnSize = +value;
             squadSize = getSquadSize(rowSize, columnSize, hostSize);
+            bufferRatio = bufferLength / (columnSize * rowSize);
             canvasCtx.clearRect(0, 0, hostSize, hostSize);
         }
     }

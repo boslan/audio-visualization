@@ -76,7 +76,9 @@
      * @returns {string}
      */
     function getColorFreq(freq) {
-        const value = normalize(freq, 255, 360);
+        const hue = normalize(freq, 255, 360);
+        const value = Math.abs(240 - hue);
+
         return `hsl(${Math.floor(value)}, 100%, 50%)`;
     }
 

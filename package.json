@@ -1,0 +1,21 @@
+{
+  "name": "audio-visual",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "browser-sync start --server --files=\"**/**\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boslan/audio-visualization.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/boslan/audio-visualization/issues"
+  },
+  "homepage": "https://github.com/boslan/audio-visualization#readme",
+  "devDependencies": {
+    "browser-sync": "^2.26.7"
+  }
+}

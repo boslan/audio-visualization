@@ -1,75 +1,74 @@
 (function () {
     const FFT_SIZE = 512;
-    const COLUMN_SIZE = 10;
-    const ROW_SIZE = 10;
+    const COLUMN_SIZE = 32;
+    const ROW_SIZE = 32;
+    const SQUAD_SIZE = 400 / COLUMN_SIZE;
 
-    let myAudio = document.querySelector('audio');
-    let audioCtx = new window.AudioContext();
-    let source = audioCtx.createMediaElementSource(myAudio);
-    let analyser = audioCtx.createAnalyser();
+    // Init audio
+    const myAudio = document.querySelector('audio');
+    const audioCtx = new window.AudioContext();
+    const source = audioCtx.createMediaElementSource(myAudio);
+    const analyser = audioCtx.createAnalyser();
     analyser.fftSize = FFT_SIZE;
-    let bufferLength = analyser.frequencyBinCount;
-    let dataArray = new Uint8Array(bufferLength);
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
 
     const BUFFER_RATION = bufferLength / (COLUMN_SIZE * ROW_SIZE);
 
     analyser.connect(audioCtx.destination);
     source.connect(analyser);
 
-    let canvas = document.getElementById('oscilloscope');
-    let canvasCtx = canvas.getContext('2d');
-    const BAR_SIZE = 400 / COLUMN_SIZE;
+    const canvas = document.getElementById('oscilloscope');
+    const canvasCtx = canvas.getContext('2d');
 
+    /**
+     * render func
+     */
     function draw() {
         requestAnimationFrame(draw);
         analyser.getByteFrequencyData(dataArray);
 
-        for (let i = 0; i < COLUMN_SIZE; i++) {
-            for (let j = 0; j < ROW_SIZE; j++) {
-                const index = Math.floor(i * j * BUFFER_RATION);
-                const freq = dataArray[index];
-                drawFreqRect(i, j, freq);
+        for (let row = 0; row < COLUMN_SIZE; row++) {
+            for (let column = 0; column < ROW_SIZE; column++) {
+                const indexFreq = Math.floor(row * column * BUFFER_RATION);
+                const freq = dataArray[indexFreq];
+                drawFreqRect(row, column, freq);
             }
         }
     }
 
+    /**
+     * render part of visualization
+     * @param row
+     * @param column
+     * @param freq
+     */
     function drawFreqRect(row, column, freq) {
-        const barPositionX = column * BAR_SIZE;
-        const barPositionY = row * BAR_SIZE;
+        const squadPosX = column * SQUAD_SIZE;
+        const squadPosY = row * SQUAD_SIZE;
         canvasCtx.fillStyle = getColorFreq(freq);
-        canvasCtx.fillRect(barPositionX, barPositionY, BAR_SIZE, BAR_SIZE);
+        canvasCtx.fillRect(squadPosX, squadPosY, SQUAD_SIZE, SQUAD_SIZE);
     }
 
+    /**
+     * get color by freq
+     * @param freq
+     * @returns {string}
+     */
     function getColorFreq(freq) {
-        const value = normalize(freq, 255, 1);
-        let color = hsv2rgb(value, 1, 1);
-        return `rgb(${color.r}, ${color.g}, ${color.b})`;
+        const value = normalize(freq, 255, 360);
+        return `hsl(${Math.floor(value)}, 100%, 50%)`;
     }
 
-    function hsv2rgb(h, s, v) {
-        let r, g, b, i, f, p, q, t;
-        i = Math.floor(h * 6);
-        f = h * 6 - i;
-        p = v * (1 - s);
-        q = v * (1 - f * s);
-        t = v * (1 - (1 - f) * s);
-        switch (i % 6) {
-            case 0: r = v, g = t, b = p; break;
-            case 1: r = q, g = v, b = p; break;
-            case 2: r = p, g = v, b = t; break;
-            case 3: r = p, g = q, b = v; break;
-            case 4: r = t, g = p, b = v; break;
-            case 5: r = v, g = p, b = q; break;
-        }
-        return {
-            r: Math.round(r * 255),
-            g: Math.round(g * 255),
-            b: Math.round(b * 255)
-        };
-    }
-
-    function normalize(value, max, min) {
-        return (value * min) / max;
+    /**
+     * Normalization value to range
+     * @param value
+     * @param max
+     * @param range
+     * @returns {number}
+     */
+    function normalize(value, max, range) {
+        return (value * range) / max;
     }
 
     draw();

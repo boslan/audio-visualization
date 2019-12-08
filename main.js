@@ -1,8 +1,9 @@
 (function () {
     const FFT_SIZE = 512;
-    const COLUMN_SIZE = 32;
-    const ROW_SIZE = 32;
-    const SQUAD_SIZE = 400 / COLUMN_SIZE;
+    let hostSize = 400;
+    let rowSize = 32;
+    let columnSize = 32;
+    let squadSize = hostSize / columnSize;
 
     // Init audio
     const myAudio = document.querySelector('audio');
@@ -13,13 +14,22 @@
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
-    const BUFFER_RATION = bufferLength / (COLUMN_SIZE * ROW_SIZE);
+    const BUFFER_RATION = bufferLength / (columnSize * rowSize);
 
     analyser.connect(audioCtx.destination);
     source.connect(analyser);
 
     const canvas = document.getElementById('oscilloscope');
     const canvasCtx = canvas.getContext('2d');
+
+    const rowsInput = document.querySelector('#rows');
+    const columnsInput = document.querySelector('#columns');
+
+    rowsInput.value = rowSize;
+    columnsInput.value = columnSize;
+
+    rowsInput.addEventListener('change', (e) => changeRows(e));
+    columnsInput.addEventListener('change', (e) => changeColumns(e));
 
     /**
      * render func
@@ -28,9 +38,9 @@
         requestAnimationFrame(draw);
         analyser.getByteFrequencyData(dataArray);
 
-        for (let row = 0; row < COLUMN_SIZE; row++) {
-            for (let column = 0; column < ROW_SIZE; column++) {
-                const indexFreq = Math.floor(row * column * BUFFER_RATION);
+        for (let row = 0; row < columnSize; row++) {
+            for (let column = 0; column < rowSize; column++) {
+                const indexFreq = Math.floor((row * column) * BUFFER_RATION);
                 const freq = dataArray[indexFreq];
                 drawFreqRect(row, column, freq);
             }
@@ -44,10 +54,10 @@
      * @param freq
      */
     function drawFreqRect(row, column, freq) {
-        const squadPosX = column * SQUAD_SIZE;
-        const squadPosY = row * SQUAD_SIZE;
+        const squadPosX = column * squadSize;
+        const squadPosY = row * squadSize;
         canvasCtx.fillStyle = getColorFreq(freq);
-        canvasCtx.fillRect(squadPosX, squadPosY, SQUAD_SIZE, SQUAD_SIZE);
+        canvasCtx.fillRect(squadPosX, squadPosY, squadSize, squadSize);
     }
 
     /**
@@ -72,5 +82,29 @@
     }
 
     draw();
+
+    function changeRows({target}) {
+        const {value} = target;
+        if (value) {
+            rowSize = +value;
+            squadSize = getSquadSize(rowSize, columnSize, hostSize);
+            canvasCtx.clearRect(0, 0, hostSize, hostSize);
+        }
+    }
+
+    function changeColumns({target}) {
+        const {value} = target;
+        if (value) {
+            columnSize = +value;
+            squadSize = getSquadSize(rowSize, columnSize, hostSize);
+            canvasCtx.clearRect(0, 0, hostSize, hostSize);
+        }
+    }
+
+    function getSquadSize(r, c, h) {
+        const rs = h / r;
+        const cs = h /c;
+        return rs > cs ? rs : cs;
+    }
 
 }());

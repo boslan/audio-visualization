@@ -5,6 +5,9 @@
 
     // Init audio
     const myAudio = document.querySelector('audio');
+    const selectFileBtn = document.querySelector('#selectFile');
+    const fileName = document.querySelector('#fileName');
+
     const audioCtx = new window.AudioContext();
     const source = audioCtx.createMediaElementSource(myAudio);
     const analyser = audioCtx.createAnalyser();
@@ -31,6 +34,7 @@
 
     rowsInput.addEventListener('change', (e) => changeRows(e));
     columnsInput.addEventListener('change', (e) => changeColumns(e));
+    selectFileBtn.addEventListener('click', () => selectFile());
 
     /**
      * render func
@@ -119,6 +123,25 @@
         const rs = h / r;
         const cs = h /c;
         return rs < cs ? rs : cs;
+    }
+
+    function uploadFile() {
+        const file = audioInput.files[0];
+        fileName.value = file.name;
+        const fReader = new FileReader();
+        fReader.readAsDataURL(file);
+        fReader.onloadend = function ({target}) {
+            const {result} = target;
+            myAudio.src = result.toString();
+            myAudio.load();
+            audioCtx.createMediaElementSource(myAudio);
+        };
+    }
+
+    const audioInput = document.querySelector('#file');
+    audioInput.addEventListener('change', () => uploadFile());
+    function selectFile() {
+        audioInput.click();
     }
 
 }());

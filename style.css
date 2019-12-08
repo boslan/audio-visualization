@@ -1,0 +1,42 @@
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+audio {
+    width: 100%;
+}
+
+#oscilloscope {
+    margin: 15px;
+}
+
+.file-selector {
+    display: flex;
+    margin: 15px;
+}
+
+.grid-input {
+    margin-top: 15px;
+}
+
+#selectFile {
+    border: none;
+    background-image: linear-gradient(45deg, rgba(59, 173, 227, 1) 0%, rgba(87, 111, 230, 1) 25%, rgba(152, 68, 183, 1) 51%, rgba(255, 53, 127, 1) 100%);
+    background-size: 200%;
+    transition: 0.5s;
+    padding: 10px 20px;
+    border-radius: 10px;
+    margin: 0 10px;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 2px;
+}
+
+#selectFile:hover {
+    background-position: right center;
+}

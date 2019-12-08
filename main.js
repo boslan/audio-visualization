@@ -1,9 +1,7 @@
 (function () {
     const FFT_SIZE = 512;
-    let hostSize = 400;
     let rowSize = 5;
     let columnSize = 5;
-    let squadSize = hostSize / columnSize;
 
     // Init audio
     const myAudio = document.querySelector('audio');
@@ -24,6 +22,9 @@
 
     const rowsInput = document.querySelector('#rows');
     const columnsInput = document.querySelector('#columns');
+
+    let canvasHeight = canvas.height;
+    let squadSize = canvasHeight / columnSize;
 
     rowsInput.value = rowSize;
     columnsInput.value = columnSize;
@@ -63,8 +64,8 @@
      * @param freq
      */
     function drawFreqRect(row, column, freq) {
-        const squadPosX = column * squadSize;
-        const squadPosY = row * squadSize;
+        const squadPosX = row * squadSize;
+        const squadPosY = column * squadSize;
         canvasCtx.fillStyle = getColorFreq(freq);
         canvasCtx.fillRect(squadPosX, squadPosY, squadSize, squadSize);
     }
@@ -96,9 +97,9 @@
         const {value} = target;
         if (value) {
             rowSize = +value;
-            squadSize = getSquadSize(rowSize, columnSize, hostSize);
+            squadSize = getSquadSize(rowSize, columnSize, canvasHeight);
             bufferRatio = bufferLength / (columnSize * rowSize);
-            canvasCtx.clearRect(0, 0, hostSize, hostSize);
+            canvasCtx.clearRect(0, 0, canvasHeight, canvasHeight);
         }
     }
 
@@ -106,16 +107,16 @@
         const {value} = target;
         if (value) {
             columnSize = +value;
-            squadSize = getSquadSize(rowSize, columnSize, hostSize);
+            squadSize = getSquadSize(rowSize, columnSize, canvasHeight);
             bufferRatio = bufferLength / (columnSize * rowSize);
-            canvasCtx.clearRect(0, 0, hostSize, hostSize);
+            canvasCtx.clearRect(0, 0, canvasHeight, canvasHeight);
         }
     }
 
     function getSquadSize(r, c, h) {
         const rs = h / r;
         const cs = h /c;
-        return rs > cs ? rs : cs;
+        return rs < cs ? rs : cs;
     }
 
 }());
